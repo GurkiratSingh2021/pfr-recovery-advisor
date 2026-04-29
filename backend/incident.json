@@ -1,0 +1,6 @@
+{
+  "incident_prompt": "DM data loss scenario",
+  "outage_type": "Data Loss",
+  "affected_machine_functions": ["DM"],
+  "top_k": 3
+}
