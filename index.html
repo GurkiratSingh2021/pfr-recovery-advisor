@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PFR Recovery Advisor</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        min-height: 100vh;
+        background: #f8fafc;
+        color: #0f172a;
+        font-family: Inter, Arial, sans-serif;
+        padding: 24px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        gap: 24px;
+      }
+
+      .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 28px 32px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      }
+
+      header.card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+
+      header p {
+        color: #475569;
+        margin-top: 4px;
+        font-size: 0.95rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0f172a;
+        color: white;
+        border-radius: 9999px;
+        padding: 8px 18px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 0.15s;
+      }
+      .badge:hover { opacity: 0.85; }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+
+      @media (max-width: 640px) {
+        .grid-2 { grid-template-columns: 1fr; }
+      }
+
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      ul {
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+
+      ul li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: #334155;
+        line-height: 1.5;
+        font-size: 0.95rem;
+      }
+
+      ul li::before {
+        content: '●';
+        color: #94a3b8;
+        font-size: 0.5rem;
+        margin-top: 6px;
+        flex-shrink: 0;
+      }
+
+      code, pre {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.85rem;
+      }
+
+      code {
+        background: #f1f5f9;
+        border-radius: 6px;
+        padding: 1px 6px;
+        color: #0f172a;
+      }
+
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 14px;
+        padding: 16px 20px;
+        overflow-x: auto;
+        line-height: 1.6;
+      }
+
+      pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+      }
+
+      .step {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+
+      .step-num {
+        background: #0f172a;
+        color: white;
+        border-radius: 9999px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      .step-body h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .steps { display: grid; gap: 20px; }
+
+      footer.card {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.85rem;
+      }
+
+      footer a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      footer a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+
+      <!-- Header -->
+      <header class="card">
+        <div>
+          <h1>PFR Recovery Advisor</h1>
+          <p>AI-powered incident recovery recommendations using Azure OpenAI &amp; Azure AI Search</p>
+        </div>
+        <a class="badge"
+           href="https://github.com/GurkiratSingh2021/pfr-recovery-advisor"
+           target="_blank" rel="noopener noreferrer">
+          ↗ View on GitHub
+        </a>
+      </header>
+
+      <!-- About + Stack -->
+      <div class="grid-2">
+        <div class="card">
+          <h2>About</h2>
+          <ul>
+            <li>Accepts an incident prompt, outage type, and affected machine functions</li>
+            <li>Retrieves relevant TSG / RCA / drill documents via Azure AI Search</li>
+            <li>Returns a grounded recovery recommendation with citations via Azure OpenAI</li>
+            <li>Starter scaffold — designed to be extended with Copilot or your own logic</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Tech stack</h2>
+          <ul>
+            <li><code>FastAPI</code> — Python backend with <code>/api/ingest</code> &amp; <code>/api/recommend</code></li>
+            <li><code>Azure OpenAI</code> — grounded chat completions</li>
+            <li><code>Azure AI Search</code> — vector + semantic retrieval</li>
+            <li><code>React + Vite</code> — operator console frontend</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Quick start -->
+      <div class="card">
+        <h2>Quick start</h2>
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Clone &amp; configure environment</h3>
+              <pre><code>git clone https://github.com/GurkiratSingh2021/pfr-recovery-advisor.git
+cd pfr-recovery-advisor
+cp backend/.env.example backend/.env
+# edit backend/.env and fill in your Azure credentials</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Start the backend</h3>
+              <pre><code>cd backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Start the frontend</h3>
+              <pre><code>cd frontend
+npm install
+npm run dev
+# open http://localhost:5173</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>Ingest documents (one-time)</h3>
+              <pre><code>python -c "from app.services.search_schema import create_or_update_index; print(create_or_update_index())"
+# then POST to /api/ingest with your TSG / RCA documents</code></pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- API reference -->
+      <div class="card">
+        <h2>API endpoints</h2>
+        <ul>
+          <li><code>GET  /health</code> — liveness check</li>
+          <li><code>POST /api/ingest</code> — index TSG / RCA / drill documents into Azure AI Search</li>
+          <li><code>POST /api/recommend</code> — retrieve grounded recovery recommendations with citations</li>
+        </ul>
+      </div>
+
+      <!-- Footer -->
+      <footer class="card">
+        <p>
+          Source code on
+          <a href="https://github.com/GurkiratSingh2021/pfr-recovery-advisor" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+          &nbsp;·&nbsp;
+          <a href="https://github.com/GurkiratSingh2021/pfr-recovery-advisor/blob/main/README.md" target="_blank" rel="noopener noreferrer">
+            README
+          </a>
+        </p>
+      </footer>
+
+    </div>
+  </body>
+</html>
