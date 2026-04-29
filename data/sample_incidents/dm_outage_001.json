@@ -1,0 +1,20 @@
+{
+  "incident_id": "ICM-20240315-001",
+  "title": "PilotFish Control Plane API degraded – auth failures + high 5xx",
+  "severity": 2,
+  "region": "eastus2",
+  "stamp": "pf-prod-eus2-stamp01",
+  "reported_at": "2024-03-15T14:22:00Z",
+  "description": "Starting at 14:18 UTC, customers reported inability to create or update DM resources. API telemetry shows 42% 5xx rate on POST /resources. Auth middleware is logging 'token validation failed' errors. Config service health probe is returning 503.",
+  "impacted_services": [
+    "PilotFish.ControlPlane.API",
+    "PilotFish.Config"
+  ],
+  "observed_signals": {
+    "SLO:5xx_rate": "42%",
+    "SLO:latency_p99": "8200ms",
+    "ICM:auth_failures": "elevated",
+    "SLO:config_fetch_success_rate": "12%"
+  },
+  "tags": ["control-plane", "auth", "config", "production"]
+}

@@ -1,0 +1,25 @@
+{
+  "incident_id": "ICM-20240401-002",
+  "title": "PilotFish Gateway 100% error rate – downstream ControlPlane.API unreachable",
+  "severity": 1,
+  "region": "westus3",
+  "stamp": "pf-prod-wus3-stamp02",
+  "reported_at": "2024-04-01T09:05:00Z",
+  "description": "Complete customer-facing outage. Gateway health probes failing. ControlPlane.API pods in CrashLoopBackOff. Identity service logs show DataStore connectivity errors. Config service not responding to heartbeats.",
+  "impacted_services": [
+    "PilotFish.Gateway",
+    "PilotFish.ControlPlane.API",
+    "PilotFish.Identity",
+    "PilotFish.Config",
+    "PilotFish.DataStore"
+  ],
+  "observed_signals": {
+    "SLO:request_success_rate": "0%",
+    "ICM:gateway_5xx": "critical",
+    "ICM:availability": "0%",
+    "ICM:auth_failures": "critical",
+    "SLO:config_fetch_success_rate": "0%",
+    "SLO:read_latency_p99": "timeout"
+  },
+  "tags": ["full-outage", "datastore", "identity", "config", "api", "gateway", "production"]
+}

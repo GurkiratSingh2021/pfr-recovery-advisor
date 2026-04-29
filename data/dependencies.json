@@ -1,0 +1,153 @@
+{
+  "services": [
+    {
+      "id": "PilotFish.DataStore",
+      "display_name": "PilotFish Data Store",
+      "description": "Core persistent storage layer (SQL + blob) used by Identity, Config and Messaging.",
+      "tier": 0,
+      "depends_on": [],
+      "health_signals": [
+        {"signal": "SLO:read_latency_p99", "source": "metrics"},
+        {"signal": "SLO:write_success_rate", "source": "metrics"}
+      ],
+      "recovery_prereqs": [],
+      "recovery_actions": [
+        "Verify storage account replication status",
+        "Check for throttling on SQL elastic pool",
+        "Confirm blob service is accessible from all stamps"
+      ]
+    },
+    {
+      "id": "PilotFish.Identity",
+      "display_name": "PilotFish Identity Service",
+      "description": "Authentication and token-issuance service. Hard dependency for API and Gateway.",
+      "tier": 1,
+      "depends_on": [
+        {"service": "PilotFish.DataStore", "type": "hard"}
+      ],
+      "health_signals": [
+        {"signal": "ICM:auth_failures", "source": "icm"},
+        {"signal": "SLO:token_issuance_p99", "source": "metrics"}
+      ],
+      "recovery_prereqs": [
+        "PilotFish.DataStore healthy"
+      ],
+      "recovery_actions": [
+        "Restart identity service pods",
+        "Verify token-signing certificate is valid and not expired",
+        "Check OIDC well-known endpoint reachability",
+        "Drain and refresh identity cache"
+      ]
+    },
+    {
+      "id": "PilotFish.Config",
+      "display_name": "PilotFish Config Service",
+      "description": "Centralized configuration provider. Must be healthy before API starts.",
+      "tier": 1,
+      "depends_on": [
+        {"service": "PilotFish.DataStore", "type": "hard"}
+      ],
+      "health_signals": [
+        {"signal": "SLO:config_fetch_success_rate", "source": "metrics"},
+        {"signal": "ICM:config_propagation_lag", "source": "icm"}
+      ],
+      "recovery_prereqs": [
+        "PilotFish.DataStore healthy"
+      ],
+      "recovery_actions": [
+        "Validate config store schema migration state",
+        "Force config cache invalidation",
+        "Restart config service with --bootstrap flag if needed"
+      ]
+    },
+    {
+      "id": "PilotFish.Messaging",
+      "display_name": "PilotFish Messaging Bus",
+      "description": "Async event bus (Service Bus-backed). Soft dependency for API, hard for Worker.",
+      "tier": 1,
+      "depends_on": [],
+      "health_signals": [
+        {"signal": "SLO:message_delivery_latency", "source": "metrics"},
+        {"signal": "ICM:dead_letter_queue_depth", "source": "icm"}
+      ],
+      "recovery_prereqs": [],
+      "recovery_actions": [
+        "Verify Service Bus namespace is accessible",
+        "Check for message lock contention on control-plane topics",
+        "Replay dead-letter messages after root cause is resolved"
+      ]
+    },
+    {
+      "id": "PilotFish.ControlPlane.API",
+      "display_name": "PilotFish Control Plane API",
+      "description": "Main control-plane HTTP API. Depends hard on Identity and Config; soft on Messaging.",
+      "tier": 2,
+      "depends_on": [
+        {"service": "PilotFish.Identity", "type": "hard"},
+        {"service": "PilotFish.Config", "type": "hard"},
+        {"service": "PilotFish.Messaging", "type": "soft"}
+      ],
+      "health_signals": [
+        {"signal": "ICM:availability", "source": "icm"},
+        {"signal": "SLO:5xx_rate", "source": "metrics"},
+        {"signal": "SLO:latency_p99", "source": "metrics"}
+      ],
+      "recovery_prereqs": [
+        "PilotFish.Config healthy",
+        "PilotFish.Identity healthy"
+      ],
+      "recovery_actions": [
+        "Perform rolling restart of API pods",
+        "Verify config hot-reload succeeded",
+        "Confirm auth middleware initialized successfully",
+        "Run smoke test against /health and /readiness endpoints"
+      ]
+    },
+    {
+      "id": "PilotFish.ControlPlane.Worker",
+      "display_name": "PilotFish Control Plane Worker",
+      "description": "Background worker processing async tasks from the Messaging bus.",
+      "tier": 3,
+      "depends_on": [
+        {"service": "PilotFish.ControlPlane.API", "type": "hard"},
+        {"service": "PilotFish.Messaging", "type": "hard"}
+      ],
+      "health_signals": [
+        {"signal": "SLO:job_success_rate", "source": "metrics"},
+        {"signal": "ICM:worker_pod_restarts", "source": "icm"}
+      ],
+      "recovery_prereqs": [
+        "PilotFish.ControlPlane.API healthy",
+        "PilotFish.Messaging healthy"
+      ],
+      "recovery_actions": [
+        "Scale worker deployment to zero and back to desired replica count",
+        "Verify dead-letter queues are drained or re-queued",
+        "Check distributed-lock state in Redis/Cosmos"
+      ]
+    },
+    {
+      "id": "PilotFish.Gateway",
+      "display_name": "PilotFish Gateway",
+      "description": "Edge gateway / API Management layer routing external traffic to ControlPlane.API.",
+      "tier": 3,
+      "depends_on": [
+        {"service": "PilotFish.ControlPlane.API", "type": "hard"},
+        {"service": "PilotFish.Identity", "type": "hard"}
+      ],
+      "health_signals": [
+        {"signal": "ICM:gateway_5xx", "source": "icm"},
+        {"signal": "SLO:request_success_rate", "source": "metrics"}
+      ],
+      "recovery_prereqs": [
+        "PilotFish.ControlPlane.API healthy",
+        "PilotFish.Identity healthy"
+      ],
+      "recovery_actions": [
+        "Flush APIM cache",
+        "Re-validate backend health-check probe configuration",
+        "Force policy reload"
+      ]
+    }
+  ]
+}
